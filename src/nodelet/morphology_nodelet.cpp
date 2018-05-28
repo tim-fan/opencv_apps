@@ -40,7 +40,7 @@ class MorphologyNodelet : public opencv_apps::Nodelet
   bool debug_view_;
   ros::Time prev_stamp_;
 
-  int size_; //size of erosion or dilation kernel
+  int kernel_size_; //size of erosion or dilation kernel
 
   std::string window_name_;
   static bool need_config_update_;
@@ -48,7 +48,7 @@ class MorphologyNodelet : public opencv_apps::Nodelet
   void reconfigureCallback(Config &new_config, uint32_t level)
   {
     config_ = new_config;
-    size_ = config_.size;
+    kernel_size_ = config_.kernel_size;
   }
 
   const std::string &frameWithDefault(const std::string &frame, const std::string &image_frame)
@@ -98,24 +98,19 @@ class MorphologyNodelet : public opencv_apps::Nodelet
 
       std::string new_window_name;
       cv::Mat img_dst;
-
+      
+      int structure_elem = 0;
+      int structure_type;  //todo: expose type as dynamic cfg parameter
+      if( structure_elem == 0 ){ structure_type = cv::MORPH_RECT; }
+      else if( structure_elem == 1 ){ structure_type = cv::MORPH_CROSS; }
+      else if( structure_elem == 2) { structure_type = cv::MORPH_ELLIPSE; }  
+          
+      cv::Mat element = cv::getStructuringElement( structure_type,
+                                           cv::Size( 2*kernel_size_ + 1, 2*kernel_size_+1 ),
+                                           cv::Point( kernel_size_, kernel_size_ ) );
       switch (config_.operation) {
         case opencv_apps::Morphology_Erode:
-          {
-        
-            int erosion_elem = 0;
-            int erosion_size = size_;
-            int erosion_type;  //todo: expose type as dynamic cfg parameter
-            if( erosion_elem == 0 ){ erosion_type = cv::MORPH_RECT; }
-            else if( erosion_elem == 1 ){ erosion_type = cv::MORPH_CROSS; }
-            else if( erosion_elem == 2) { erosion_type = cv::MORPH_ELLIPSE; }
-
-            cv::Mat element = cv::getStructuringElement( erosion_type,
-                                                 cv::Size( 2*erosion_size + 1, 2*erosion_size+1 ),
-                                                 cv::Point( erosion_size, erosion_size ) );
-                                                 
-            
-
+          {                                     
             /// Apply the erosion operation
             cv::erode( src_gray, img_dst, element);
             new_window_name = "Erosion Demo";
@@ -124,17 +119,6 @@ class MorphologyNodelet : public opencv_apps::Nodelet
           }
         case opencv_apps::Morphology_Dilate:
           {
-            int dilation_elem = 0;
-            int dilation_type = 0; //todo: expose type as dynamic cfg parameter
-            int dilation_size = size_;
-            if( dilation_elem == 0 ){ dilation_type = cv::MORPH_RECT; }
-            else if( dilation_elem == 1 ){ dilation_type = cv::MORPH_CROSS; }
-            else if( dilation_elem == 2) { dilation_type = cv::MORPH_ELLIPSE; }
-
-            cv::Mat element = getStructuringElement( dilation_type,
-                                 cv::Size( 2*dilation_size + 1, 2*dilation_size+1 ),
-                                 cv::Point( dilation_size, dilation_size ) );
-
             /// Apply the dilation operation
             cv::dilate( src_gray, img_dst, element );
 
@@ -142,16 +126,25 @@ class MorphologyNodelet : public opencv_apps::Nodelet
 
             break;
           }
+        case opencv_apps::Morphology_Open:
+          {
+            /// Apply the opening operation
+            morphologyEx( src_gray, img_dst, cv::MORPH_OPEN, element );
+            
+            new_window_name = "Opening Demo";
+
+            break;
+          }
       }
       
       if( debug_view_) {
         if (need_config_update_) {
-          config_.size = size_;
+          config_.kernel_size = kernel_size_;
           reconfigure_server_->updateConfig(config_);
           need_config_update_ = false;
         }
         if( window_name_ == new_window_name) {
-          cv::createTrackbar( "Size:", window_name_, &size_, 100, trackbarCallback);
+          cv::createTrackbar( "Size:", window_name_, &kernel_size_, 100, trackbarCallback);
         }
 
         if (window_name_ != new_window_name) {
@@ -204,7 +197,7 @@ public:
     prev_stamp_ = ros::Time(0, 0);
 
     window_name_ = "Morphology Demo";
-    size_ = 3; 
+    kernel_size_ = 3; 
 
     reconfigure_server_ = boost::make_shared<dynamic_reconfigure::Server<Config> >(*pnh_);
     dynamic_reconfigure::Server<Config>::CallbackType f =
