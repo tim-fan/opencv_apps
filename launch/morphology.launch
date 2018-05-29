@@ -7,7 +7,7 @@
   <arg name="debug_view" default="true" doc="Specify whether the node displays a window to show edge image" />
 
   <arg name="operation" default="0" doc="Specify morphological operation. 0: Erosion, 1: Dilation." />
-  <arg name="size" default="3" doc="Size of erosion/dilation kernel." />
+  <arg name="kernel_size" default="3" doc="Size of erosion/dilation kernel." />
 
   <!-- mophology.cpp  -->
   <node name="$(arg node_name)" pkg="opencv_apps" type="morphology" >

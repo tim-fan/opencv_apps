@@ -63,6 +63,10 @@
     <description>Nodelet for detecting corners using Harris method</description>
   </class>
 
+  <class name="opencv_apps/image_mask" type="opencv_apps::ImageMaskNodelet" base_class_type="nodelet::Nodelet">
+    <description>Nodelet to perform image masking</description>
+  </class>
+
   <class name="opencv_apps/camshift" type="opencv_apps::CamShiftNodelet" base_class_type="nodelet::Nodelet">
     <description>Nodelet to show mean-shift based tracking</description>
   </class>

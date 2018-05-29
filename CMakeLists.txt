@@ -248,7 +248,7 @@ opencv_apps_add_nodelet(camshift src/nodelet/camshift_nodelet.cpp) # ./camshiftd
 # ./contours2.cpp
 # ./convexhull.cpp
 # ./cout_mat.cpp
-# ./create_mask.cpp
+opencv_apps_add_nodelet(image_mask src/nodelet/image_mask_nodelet.cpp)# ./create_mask.cpp
 # ./dbt_face_detection.cpp
 # ./delaunay2.cpp
 # ./demhist.cpp
