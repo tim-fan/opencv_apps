@@ -15,6 +15,6 @@
     <param name="use_camera_info" value="$(arg use_camera_info)" />
     <param name="debug_view" value="$(arg debug_view)" />
     <param name="operation" value="$(arg operation)" />
-    <param name="size" value="$(arg size)" />
+    <param name="kernel_size" value="$(arg kernel_size)" />
   </node>
 </launch>
